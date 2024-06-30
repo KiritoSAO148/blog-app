@@ -6,6 +6,9 @@ import { Button } from "flowbite-react";
 import CallToAction from "../components/CallToAction";
 import CommentSection from "../components/CommentSection";
 import PostCard from "../components/PostCard";
+import { postApi } from "../utils/api/postApi";
+import { AiFillLike, AiOutlineLike } from "react-icons/ai";
+import { useSelector } from "react-redux";
 
 export default function PostPage() {
   const { postSlug } = useParams();
@@ -13,16 +16,17 @@ export default function PostPage() {
   const [error, setError] = useState(false);
   const [post, setPost] = useState(null);
   const [recentPosts, setRecentPosts] = useState(null);
+  const [isUserLike, setIsUserLike] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+
+  const user = useSelector((state) => state.user.currentUser);
 
   useEffect(() => {
     const fetchPost = async () => {
       try {
         setLoading(true);
-
         const res = await fetch(`/api/post/getposts?slug=${postSlug}`);
-
         const data = await res.json();
-
         if (!res.ok) {
           setError(true);
           setLoading(false);
@@ -31,8 +35,12 @@ export default function PostPage() {
 
         if (res.ok) {
           setPost(data.posts[0]);
+          setLikeCount(data.posts[0]?.like?.length);
           setLoading(false);
           setError(false);
+          postApi.updateView(data.posts[0]?._id);
+
+          if (data.posts[0]?.like?.includes(user?._id)) setIsUserLike(true);
         }
       } catch (error) {
         setError(true);
@@ -68,11 +76,46 @@ export default function PostPage() {
       </div>
     );
 
+  const handleLike = async () => {
+    if (!post || !user) return;
+    try {
+      await postApi.likePost(post?._id, user?._id);
+      setIsUserLike(!isUserLike);
+
+      if (isUserLike) setLikeCount(likeCount - 1);
+      else setLikeCount(likeCount + 1);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
   return (
     <main className="p-3 flex flex-col max-w-6xl mx-auto min-h-screen">
       <h1 className="text-3xl mt-10 p-3 text-center font-serif max-w-2xl mx-auto lg:text-4xl">
         {post && post.title}
       </h1>
+
+      <div>
+        <p className="font-bold text-gray-400 italic">
+          Lượt xem: {post?.view || 0}
+        </p>
+        <div className="flex flex-row  gap-3">
+          <p className="font-bold text-gray-400 italic">
+            Lượt thích: {likeCount || 0}
+          </p>
+          <button className="" onClick={handleLike}>
+            {!isUserLike ? (
+              <AiOutlineLike size={20} />
+            ) : (
+              <AiFillLike
+                size={20}
+                className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full"
+              />
+            )}
+          </button>
+        </div>
+      </div>
+
       <Link
         to={`/search?category=${post && post.category}`}
         className="self-center mt-5"
@@ -84,7 +127,7 @@ export default function PostPage() {
       <img
         src={post && post.image}
         alt={post && post.title}
-        className="mt-10 p-3 max-h-[600px] w-full object-cover"
+        className="mt-10 max-h-[600px] w-full object-cover rounded-lg"
       />
       <div className="flex justify-between p-3 border-b border-slate-500 mx-auto w-full max-w-2xl text-xs">
         <span>{post && new Date(post.createdAt).toLocaleDateString()}</span>
@@ -93,7 +136,7 @@ export default function PostPage() {
         </span>
       </div>
       <div
-        className="p-3 max-w-2xl mx-auto w-full post-content"
+        className="p-3 max-w-2xl mx-auto w-full post-content break-words whitespace-pre-wrap overflow-hidden text-ellipsis"
         dangerouslySetInnerHTML={{ __html: post && post.content }}
       ></div>
       <div className="max-w-4xl mx-auto w-full">

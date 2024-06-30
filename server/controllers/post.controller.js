@@ -1,4 +1,5 @@
 import Post from "../models/post.model.js";
+import User from "../models/user.model.js";
 import { errorHandler } from "../utils/error.js";
 
 export const create = async (req, res, next) => {
@@ -111,4 +112,60 @@ export const updatepost = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+export const updateView = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.postId);
+    if (!post) return res.status(404).json({ message: "Not Found" });
+    post.view += 1;
+    await post.save();
+    res.status(200).json(true);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateLike = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.postId);
+    if (!post) return res.status(404).json({ message: "Not Found" });
+    const user = await User.findById(req.body.userId);
+    if (!user) return res.status(404).json({ message: "Not Found" });
+    if (post.like.includes(req.body.userId)) {
+      post.like = post.like.filter((id) => id !== req.body.userId);
+    } else {
+      post.like.push(req.body.userId);
+    }
+    await post.save();
+    res.status(200).json(true);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getTopPosts = async (req, res, next) => {
+  try {
+    const posts = await Post.find({
+      like: { $exists: true, $type: "array", $not: { $size: 0 } },
+      view: { $exists: true },
+      // comments: { $exists: true, $type: "array", $not: { $size: 0 } },
+      // isShow: true,
+    })
+      .sort({ view: -1, like: -1 })
+      .limit(5);
+
+    res.status(200).json(posts);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const newPosts = async (req, res) => {
+  try {
+    const res = await Post.find({
+      createdAt: -1,
+    }).limit(4);
+    res.status(200).json(res);
+  } catch (error) {}
 };

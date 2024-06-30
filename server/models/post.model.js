@@ -34,6 +34,22 @@ const postSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    view: {
+      type: Number,
+      default: 0,
+    },
+    like: [String],
+    isShow: {
+      type: Boolean,
+      default: true,
+    },
+    comments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Comment",
+        default: null,
+      },
+    ],
   },
   { timestamps: true }
 );

@@ -13,8 +13,8 @@ const commentSchema = new mongoose.Schema(
     },
 
     userId: {
-      type: String,
-      required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
 
     likes: {
@@ -25,6 +25,20 @@ const commentSchema = new mongoose.Schema(
     numberOfLikes: {
       type: Number,
       default: 0,
+    },
+
+    children: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Comment",
+        default: null,
+      },
+    ],
+
+    parentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Comment",
+      default: null,
     },
   },
   { timestamps: true }

@@ -12,6 +12,7 @@ import { Link, useLocation } from "react-router-dom";
 import { signoutSuccess } from "../redux/user/userSlice";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
+import { FaKey } from "react-icons/fa";
 
 export default function DashSidebar() {
   const location = useLocation();
@@ -103,6 +104,11 @@ export default function DashSidebar() {
                   as="div"
                 >
                   Comments
+                </Sidebar.Item>
+              </Link>
+              <Link to="/dashboard?tab=keyGPT">
+                <Sidebar.Item active={tab === "settings"} icon={FaKey} as="div">
+                  Key GPT
                 </Sidebar.Item>
               </Link>
             </>

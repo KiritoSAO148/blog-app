@@ -6,11 +6,13 @@ import { Provider } from "react-redux";
 import { persistor } from "./redux/store.js";
 import { PersistGate } from "redux-persist/integration/react";
 import ThemeProvider from "./components/ThemeProvider.jsx";
+import { Toaster } from "react-hot-toast";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <PersistGate persistor={persistor}>
     <Provider store={store}>
       <ThemeProvider>
+        <Toaster />
         <App />
       </ThemeProvider>
     </Provider>

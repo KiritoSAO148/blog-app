@@ -4,10 +4,12 @@ import themeReducer from "./theme/themeSlice";
 import { persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import { persistStore } from "redux-persist";
+import messageSlice from "./messageSlice";
 
 const rootReducer = combineReducers({
   user: userReducer,
   theme: themeReducer,
+  messages: messageSlice,
 });
 
 const persistConfig = {

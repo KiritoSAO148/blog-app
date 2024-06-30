@@ -13,6 +13,7 @@ export default function CommentSection({ postId }) {
   const [comments, setComments] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [commentIdToDelete, setCommentIdToDelete] = useState(null);
+  const [isD, setIsD] = useState(0);
 
   const navigate = useNavigate();
 
@@ -110,13 +111,17 @@ export default function CommentSection({ postId }) {
         return;
       }
 
-      const res = await fetch(`/api/comment/deleteComment/${commentId}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `/api/comment/deleteComment/${commentId}/${postId}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (res.ok) {
         const data = await res.json();
-        setComments(comments.filter((comment) => comment._id !== commentId));
+        setComments(data);
+        setIsD(isD + 1);
       }
     } catch (error) {
       console.log(error.message);
@@ -185,18 +190,31 @@ export default function CommentSection({ postId }) {
               <p>{comments.length}</p>
             </div>
           </div>
-          {comments.map((comment) => (
-            <Comment
-              key={comment._id}
-              comment={comment}
-              onLike={handleLike}
-              onEdit={handleEdit}
-              onDelete={() => {
-                setShowModal(true);
-                setCommentIdToDelete(comment._id);
-              }}
-            />
-          ))}
+          <div
+            className=""
+            style={{
+              maxHeight: 500,
+              overflow: "auto",
+            }}
+          >
+            {comments.map((comment) => {
+              return (
+                <div key={comment._id}>
+                  <Comment
+                    key={isD}
+                    postId={postId}
+                    comment={comment}
+                    onLike={handleLike}
+                    onEdit={handleEdit}
+                    onDelete={(id) => {
+                      setShowModal(true);
+                      setCommentIdToDelete(id);
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </div>
         </>
       )}
       <Modal
