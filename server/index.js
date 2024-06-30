@@ -9,8 +9,11 @@ import messageRoutes from "./routes/message.js";
 import customRoutes from "./routes/systomCustomer.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import path from "path";
 
 dotenv.config();
+
+const __dirname = path.resolve();
 
 const app = express();
 
@@ -37,6 +40,12 @@ app.use("/api/post", postRoutes);
 app.use("/api/comment", commentRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/custom", customRoutes);
+
+app.use(express.static(path.join(__dirname, "/client/dist")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
+});
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
